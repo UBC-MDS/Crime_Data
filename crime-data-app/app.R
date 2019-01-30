@@ -7,7 +7,7 @@ library(DT)
 library(plotly)
 
 # load data
-dat <- read.csv('crime_lat_long.csv')
+dat <- read.csv("crime_lat_long.csv")
 
 # set crimes for select box input
 crimes_list <- c("Homicide" = "homs_per_100k",
@@ -16,7 +16,7 @@ crimes_list <- c("Homicide" = "homs_per_100k",
                  "Aggrevated Assault" = "agg_ass_per_100k")
 
 # set crimes for checker box input
-crimes_checker <- c('Homicide', 'Rape', 'Robbery', 'Aggrevated Assault')
+crimes_checker <- c("Homicide", "Rape", "Robbery", "Aggrevated Assault")
 
 
 # get cities for select box input
@@ -35,7 +35,7 @@ ui <- fluidPage(
   theme = shinytheme("flatly"),
   
   # sed a title
-  titlePanel(h1("Violent Crime Rates in the United States", align = 'center'),
+  titlePanel(h1("Violent Crime Rates in the United States", align = "center"),
              windowTitle = "Crime Data"),
   
   # new panel with two tabs
@@ -49,19 +49,18 @@ ui <- fluidPage(
           
           sliderInput("year_input", "Select a year",
                       min = 1975, max = 2014, value = 2000, 
-                      width = '100%', sep="", animate=animationOptions(interval=700, loop=TRUE)),
-          #selectInput("crime_input", "Select a Crime", crimes_list)
+                      width = "100%", sep = "", animate = animationOptions(interval = 700, loop = TRUE)),
           checkboxGroupInput("crime_input", 
                              "Select a Crime", 
                              crimes_list, 
-                             selected=c('homs_per_100k','rape_per_100k','rob_per_100k','agg_ass_per_100k')
+                             selected = c("homs_per_100k","rape_per_100k","rob_per_100k","agg_ass_per_100k")
                              )
         ),
         # main panel for map
         mainPanel(leafletOutput("mymap"))
       )
     ),
-    # Chart tab
+    # Chart/table tab
     tabPanel(
       title = "Single City",
       sidebarLayout(
@@ -78,7 +77,7 @@ ui <- fluidPage(
           plotlyOutput("line_chart"),
           hr(),
           h4("Comparisions from the National Average and City Safety Ranking",
-             align = 'center'),
+             align = "center"),
           dataTableOutput("percentage_table")
         )
       )
@@ -103,7 +102,7 @@ ui <- fluidPage(
   )
 )
 
-# Define server logic required to draw a histogram
+# Define server logic 
 server <- function(input, output) {
   
   # get city data for line chart
@@ -124,15 +123,15 @@ server <- function(input, output) {
   # get city data prepared for plotting lines
   single_city_line <- reactive(
     single_city_dat() %>% 
-      rename('Total Violent Crimes' = violent_per_100k,
-             'Homicide' = homs_per_100k,
-             'Rape' = rape_per_100k, 
-             'Robbery' = rob_per_100k, 
-             'Aggrevated Assault' = agg_ass_per_100k) %>% 
-      gather(total_pop, 'Total Violent Crimes', 'Homicide', 'Rape', 
-             'Robbery', 'Aggrevated Assault',
+      rename("Total Violent Crimes" = violent_per_100k,
+             "Homicide" = homs_per_100k,
+             "Rape" = rape_per_100k, 
+             "Robbery" = rob_per_100k, 
+             "Aggrevated Assault" = agg_ass_per_100k) %>% 
+      gather(total_pop, "Total Violent Crimes", "Homicide", "Rape", 
+             "Robbery", "Aggrevated Assault",
              key = "type", value = "count") %>% 
-      filter(type %in% c('Total Violent Crimes', input$crime_checks))
+      filter(type %in% c("Total Violent Crimes", input$crime_checks))
   )
   
   # get the city rank for current year
@@ -143,7 +142,7 @@ server <- function(input, output) {
       filter(city == input$city_input)
     )
   
-  # get the average table for current year
+  # get the average for values in table
   avg <- reactive(
     dat %>% 
       group_by(year) %>% 
@@ -159,19 +158,19 @@ server <- function(input, output) {
     dat %>%
       filter(year == input$year_input) %>% 
       select(input$crime_input) %>% 
-      mutate(calc =rowSums(.,na.rm=TRUE)*ifelse(!("rob_per_100k" %in% input$crime_input) & !("agg_ass_per_100k" %in% input$crime_input),
+      mutate(calc = rowSums(.,na.rm = TRUE)*ifelse(!("rob_per_100k" %in% input$crime_input) & !("agg_ass_per_100k" %in% input$crime_input),
                                                 ifelse("rape_per_100k" %in% input$crime_input,8,20),1))
   )
     
-  labs <- reactive(lapply(seq(nrow(dat%>% filter(year==input$year_input))), function(i) {
-    z <- dat %>% filter(year==input$year_input)
-    paste0( '<ul> <b>',z[i, "city"], '</b><li>', 
-            'Total Population: ', prettyNum(round(z[i, "total_pop"]),big.mark = ","),'</li><li>',
-            'Total Crime (per 100k): ', prettyNum(round(z[i, "violent_per_100k"]),big.mark = ","),'</li><li>', 
-            'Homicide (per 100k): ', prettyNum(round(z[i, "homs_per_100k"]),big.mark = ","),'</li><li>', 
-            'Rape (per 100k): ', prettyNum(round(z[i, "rape_per_100k"]),big.mark = ","),'</li><li>', 
-            'Robbery (per 100k: ', prettyNum(round(z[i, "rob_per_100k"]),big.mark = ","),'</li><li>', 
-            'Assault (per 100k): ', prettyNum(round(z[i, "agg_ass_per_100k"]),big.mark = ","),'</li></ul>' 
+  labs <- reactive(lapply(seq(nrow(dat%>% filter(year == input$year_input))), function(i) {
+    z <- dat %>% filter(year == input$year_input)
+    paste0( "<ul> <b>",z[i, "city"], "</b><li>", 
+            "Total Population: ", prettyNum(round(z[i, "total_pop"]),big.mark = ","),"</li><li>",
+            "Total Crime (per 100k): ", prettyNum(round(z[i, "violent_per_100k"]),big.mark = ","),"</li><li>", 
+            "Homicide (per 100k): ", prettyNum(round(z[i, "homs_per_100k"]),big.mark = ","),"</li><li>", 
+            "Rape (per 100k): ", prettyNum(round(z[i, "rape_per_100k"]),big.mark = ","),"</li><li>", 
+            "Robbery (per 100k: ", prettyNum(round(z[i, "rob_per_100k"]),big.mark = ","),"</li><li>", 
+            "Assault (per 100k): ", prettyNum(round(z[i, "agg_ass_per_100k"]),big.mark = ","),"</li></ul>" 
             ) 
   }))
 
@@ -193,20 +192,20 @@ server <- function(input, output) {
   lines <- reactive(
     ggplot() +
       geom_line(data = single_city_line(), 
-                aes(x = year, y = count, color = type), size=0.5) +
-      scale_color_manual(values = c("Aggrevated Assault" = '#a6d854',
-                                    "Homicide" = '#fc8d62', 
-                                    "Rape" = '#4363d8', 
-                                    "Robbery" = '#e78ac3', 
-                                    "Total Violent Crimes" = '#e6194b'), name = "") + 
+                aes(x = year, y = count, color = type), size = 0.5) +
+      scale_color_manual(values = c("Aggrevated Assault" = "#a6d854",
+                                    "Homicide" = "#fc8d62", 
+                                    "Rape" = "#4363d8", 
+                                    "Robbery" = "#e78ac3", 
+                                    "Total Violent Crimes" = "#e6194b"), name = "") + 
       theme_bw() +
-      theme(axis.text.x=element_text(size=8),
-            axis.text.y=element_text(size=8),
-            axis.title.x=element_text(size=10),
-            axis.title.y=element_text(size=10),
-            legend.text=element_text(size=8) 
+      theme(axis.text.x = element_text(size = 8),
+            axis.text.y = element_text(size = 8),
+            axis.title.x = element_text(size = 10),
+            axis.title.y = element_text(size = 10),
+            legend.text = element_text(size = 8) 
       )+
-      scale_x_discrete(limit=c(1975:2015),  breaks = every_nth(n = 5))+
+      scale_x_discrete(limit = c(1975:2015),  breaks = every_nth(n = 5))+
       xlab("Year") + 
       ylab("Crime Rate per 100k People")
   )
@@ -217,7 +216,7 @@ server <- function(input, output) {
       lines() + 
         geom_bar(data = single_city_dat(), 
                  aes(x = year, y = total_pop),
-                 stat="identity", fill = 'slategray1',alpha = 0.5)
+                 stat = "identity", fill = "slategray1",alpha = 0.5)
     } else {
       lines()
     }
